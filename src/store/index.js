@@ -12,7 +12,6 @@ export default class Store {
   @observable y2 = 0;
   @observable x3 = 0;
   @observable y3 = 0;
-
   @observable initAngleP1 = 0;
   @observable initAngleP2 = 0;
   @observable initAngleP3 = 0;
@@ -82,6 +81,11 @@ export default class Store {
     this.y3 = y;
   }
 
+  @action changeP4(x, y) {
+    this.x4 = x;
+    this.y4 = y;
+  }
+
   get recWidth() {
     return Math.sqrt((this.x2 - this.x1) ** 2 + (this.y2 - this.y1) ** 2);
   }
@@ -94,17 +98,6 @@ export default class Store {
     this.movable = able;
   }
 
-  @action updateInitState() {
-    let rotatedAngles = this.rotatedAngles;
-    this.initRadius = this.radius;
-    this.initAngleP1 = asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) - this.angleToRadian(rotatedAngles);
-    this.initAngleP2 = asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12 - this.angleToRadian(rotatedAngles);
-    this.initAngleP3 = asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12 + PI - this.angleToRadian(rotatedAngles);
-    this.initOx = (this.x2 + this.x3) / 2;
-    this.initOy = (this.y2 + this.y3) / 2;
-    console.log(this.initRadius, this.initOx, this.initOy);
-  }
-
   @action swingAngle(angle) {
     this.rotatedAngles = angle;
 
@@ -115,6 +108,7 @@ export default class Store {
     this.x2 = this.initOx - this.initRadius * cos(this.initAngleP2 + radianDlt);
     this.y2 = this.initOy - this.initRadius * sin(this.initAngleP2 + radianDlt);
     this.x3 = this.initOx - this.initRadius * cos(this.initAngleP3 + radianDlt);
-    console.log(this.initRadius, this.initOx, this.initOy);
+    this.y3 = this.initOy - this.initRadius * sin(this.initAngleP3 + radianDlt);
+    console.log(this.x1, this.x2, this.x3);
   }
 }

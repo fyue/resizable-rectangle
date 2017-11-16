@@ -28,10 +28,10 @@ class Layout extends React.Component {
     const viewProps = {
       onMouseMove: (e) => {
         const {x1: X1, y1: Y1, movable} = store;
-        if (movable) {
+        /*if (movable) {
           let Cx = e.clientX;
           let Cy = e.clientY;
-          let deg = rotatedAngles * PI / 180;
+          //let deg = currentDeg * PI / 180;
 
           let Lx = Cx - X1;
           let Ly = Cy - Y1;
@@ -48,12 +48,13 @@ class Layout extends React.Component {
 
           store.changeP2(P2x, P2y);
           store.changeP3(P3x, P3y);
-        }
+          store.changeP4(Cx, Cy);
+        }*/
       },
       onMouseUp: () => {
         if (store.movable) {
           store.changeResizeAble(false);
-          store.updateInitState();
+          store.copyCurrentPos();
         }
       }
     };
