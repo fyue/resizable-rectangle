@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import css from './index.less';
 import {observer, inject} from 'mobx-react';
 
-const {sin, cos, atan, PI, sqrt} = Math;
+const {sin, cos, atan, abs, sqrt, PI} = Math;
 
 @inject('store')
 @observer
@@ -28,33 +28,36 @@ class Layout extends React.Component {
     const viewProps = {
       onMouseMove: (e) => {
         const {x1: X1, y1: Y1, movable} = store;
-        /*if (movable) {
+        if (movable) {
           let Cx = e.clientX;
           let Cy = e.clientY;
-          //let deg = currentDeg * PI / 180;
+          let deg = rotatedAngles * PI / 180;
 
-          let Lx = Cx - X1;
-          let Ly = Cy - Y1;
-          let gama = atan(Ly / Lx) - deg;
+          let Lx = abs(Cx - X1);
+          let Ly = abs(Cy - Y1);
           let length = sqrt(Lx ** 2 + Ly ** 2);
+
+          let gama;
+          if (Cy >= Y1 && Cx <= X1) {
+            gama = PI - deg - atan(Ly / Lx);
+          } else if (Cy >= Y1 && Cx > X1) {
+            gama = atan(Ly / Lx) - deg;
+          }
           let f2 = length * sin(gama);
           let f3 = length * cos(gama);
-
           let P2x = Cx + f2 * sin(deg);
           let P2y = Cy - f2 * cos(deg);
-
           let P3x = Cx - f3 * cos(deg);
           let P3y = Cy - f3 * sin(deg);
 
           store.changeP2(P2x, P2y);
           store.changeP3(P3x, P3y);
-          store.changeP4(Cx, Cy);
-        }*/
+        }
       },
       onMouseUp: () => {
         if (store.movable) {
           store.changeResizeAble(false);
-          store.copyCurrentPos();
+          store.updateInitState();
         }
       }
     };

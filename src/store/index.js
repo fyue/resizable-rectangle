@@ -30,12 +30,12 @@ export default class Store {
     this.y2 = 100;
     this.x3 = 100;
     this.y3 = 200;
-    this.initRadius = this.radius;
-    this.initAngleP1 = asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius);
-    this.initAngleP2 = asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12;
-    this.initAngleP3 = asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12 + PI;
     this.initOx = (this.x2 + this.x3) / 2;
     this.initOy = (this.y2 + this.y3) / 2;
+    this.initRadius = this.radius;
+    this.initAngleP1 = asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius);
+    this.initAngleP2 = this.initAngleP1 + this.angleP12;
+    this.initAngleP3 = this.initAngleP2 + PI;
     console.log(this.initRadius, this.initOx, this.initOy);
   }
 
@@ -81,11 +81,6 @@ export default class Store {
     this.y3 = y;
   }
 
-  @action changeP4(x, y) {
-    this.x4 = x;
-    this.y4 = y;
-  }
-
   get recWidth() {
     return Math.sqrt((this.x2 - this.x1) ** 2 + (this.y2 - this.y1) ** 2);
   }
@@ -96,6 +91,24 @@ export default class Store {
 
   @action changeResizeAble(able) {
     this.movable = able;
+  }
+
+  @action updateInitState() {
+    let rotatedAngles = this.angleToRadian(this.rotatedAngles);
+    let CurrentAngleP1 = asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius);
+    this.initRadius = this.radius;
+    this.initOx = (this.x2 + this.x3) / 2;
+    this.initOy = (this.y2 + this.y3) / 2;
+    //CurrentAngleP1 is always <= PI / 2
+    if (this.initOx <= this.x1) {
+      this.initAngleP1 = PI - CurrentAngleP1 - rotatedAngles;
+    } else {
+      this.initAngleP1 = CurrentAngleP1 - rotatedAngles;
+    }
+    this.initAngleP2 = this.initAngleP1 + this.angleP12;
+    this.initAngleP3 = this.initAngleP2 + PI;
+
+    console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
   }
 
   @action swingAngle(angle) {
@@ -109,6 +122,6 @@ export default class Store {
     this.y2 = this.initOy - this.initRadius * sin(this.initAngleP2 + radianDlt);
     this.x3 = this.initOx - this.initRadius * cos(this.initAngleP3 + radianDlt);
     this.y3 = this.initOy - this.initRadius * sin(this.initAngleP3 + radianDlt);
-    console.log(this.x1, this.x2, this.x3);
+    console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
   }
 }
