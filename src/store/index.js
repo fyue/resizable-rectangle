@@ -108,7 +108,7 @@ export default class Store {
     this.initAngleP2 = this.initAngleP1 + this.angleP12;
     this.initAngleP3 = this.initAngleP2 + PI;
 
-    console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
+    //console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
   }
 
   @action swingAngle(angle) {
@@ -122,6 +122,6 @@ export default class Store {
     this.y2 = this.initOy - this.initRadius * sin(this.initAngleP2 + radianDlt);
     this.x3 = this.initOx - this.initRadius * cos(this.initAngleP3 + radianDlt);
     this.y3 = this.initOy - this.initRadius * sin(this.initAngleP3 + radianDlt);
-    console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
+    //console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
   }
 }
