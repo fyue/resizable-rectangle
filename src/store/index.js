@@ -21,7 +21,10 @@ export default class Store {
 
   @observable rotatedAngles = 0; //angle, not radian
 
-  @observable movable = false;
+  @observable movable1 = false;
+  @observable movable2 = false;
+  @observable movable3 = false;
+  @observable movable4 = false;
 
   constructor() {
     this.x1 = 100;
@@ -59,6 +62,8 @@ export default class Store {
       y4: this.y2 + this.y3 - this.y1,
       Ox: (this.x2 + this.x3) / 2,
       Oy: (this.y2 + this.y3) / 2,
+      L12: sqrt((this.x2 - this.x1) ** 2 + (this.y2 - this.y1) ** 2),
+      L13: sqrt((this.x3 - this.x1) ** 2 + (this.y3 - this.y1) ** 2),
       radius: this.radius,
       initAngleP1: asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius),
       initAngleP2: asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12,
@@ -89,8 +94,8 @@ export default class Store {
     return Math.sqrt((this.x3 - this.x1) ** 2 + (this.y3 - this.y1) ** 2);
   }
 
-  @action changeResizeAble(able) {
-    this.movable = able;
+  @action changeResizeAble(which, able) {
+    this[which] = able;
   }
 
   @action updateInitState() {
@@ -107,7 +112,6 @@ export default class Store {
     }
     this.initAngleP2 = this.initAngleP1 + this.angleP12;
     this.initAngleP3 = this.initAngleP2 + PI;
-
     //console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
   }
 

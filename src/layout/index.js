@@ -3,6 +3,8 @@ import classnames from 'classnames';
 import css from './index.less';
 import {observer, inject} from 'mobx-react';
 
+import Portal from '../layout/Portal';
+
 const {sin, cos, atan, abs, sqrt, PI, tan} = Math;
 
 @inject('store')
@@ -21,14 +23,15 @@ class Layout extends React.Component {
   render() {
     const {store} = this.props;
     const {rotatedAngles, x1, y1, x2, y2, x3, y3} = store;
-    const {x4, y4} = store.properties;
+    const {x4, y4, L12, L13} = store.properties;
 
-    const path = `${x1},${y1} ${x2},${y2} ${x4},${y4} ${x3},${y3}`;
+    // const path = `${x1},${y1} ${x2},${y2} ${x4},${y4} ${x3},${y3}`;
 
     const viewProps = {
       onMouseMove: (e) => {
-        const {x1: X1, y1: Y1, movable} = store;
-        if (movable) {
+        const {x1: X1, y1: Y1, x2: X2, y2: Y2, x3: X3, y3: Y3, x4: X4, y4: Y4} = store;
+        const {movable1, movable2, movable3, movable4} = store;
+        if (movable4) {
           let Cx = e.clientX;
           let Cy = e.clientY;
           let deg = rotatedAngles * PI / 180;
@@ -38,18 +41,13 @@ class Layout extends React.Component {
           let length = sqrt(Lx ** 2 + Ly ** 2);
           let gama, P2x, P2y, P3x, P3y;
 
-          //compute the border limitation;
-          let boundaryX1 = (Cy - Y1) / tan(PI / 2 + deg) + X1;
-          let boundaryX2 = (Cy - Y1) / tan(deg) + X1;
-          let boundaryY1 = (Cx - X1) * tan(PI / 2 + deg) + Y1;
-          let boundaryY2 = (Cx - X1) * tan(deg) + Y1;
-          let inXLimit = Cx >= boundaryX1 && Cx <= boundaryX2;
-          let inYLimit = Cy >= boundaryY1 && Cy <= boundaryY2;
+          // compute the border limitation;
+          let borderDeg1 = deg;
+          let borderDeg2 = deg + PI / 2;
+          let Kpo = abs((Cy - Y1) / (Cx - X1));
+          let angleCursorP1; // 计算指针的瞬时转角
 
-          /*console.log('B1:', boundaryX1, 'B2:', boundaryX2);
-           console.log('Cx:', Cx);*/
-
-          if (Cy >= Y1 && Cx <= X1) { // 第三象限
+          if (Cy >= Y1 && Cx <= X1) { // 相对于P1第三象限
             gama = PI - deg - atan(Ly / Lx);
             let f2 = length * sin(gama);
             let f3 = length * cos(gama);
@@ -57,7 +55,9 @@ class Layout extends React.Component {
             P2y = Cy - f2 * cos(deg);
             P3x = Cx - f3 * cos(deg);
             P3y = Cy - f3 * sin(deg);
-          } else if (Cy >= Y1 && Cx > X1) { // 第四象限
+
+            angleCursorP1 = PI - atan(Kpo);
+          } else if (Cy >= Y1 && Cx > X1) { // 相对于P1第四象限
             gama = atan(Ly / Lx) - deg;
             let f2 = length * sin(gama);
             let f3 = length * cos(gama);
@@ -65,7 +65,9 @@ class Layout extends React.Component {
             P2y = Cy - f2 * cos(deg);
             P3x = Cx - f3 * cos(deg);
             P3y = Cy - f3 * sin(deg);
-          } else if (Cy < Y1 && Cx < X1) { //第二象限
+
+            angleCursorP1 = atan(Kpo);
+          } else if (Cy < Y1 && Cx < X1) { // 相对于P1第二象限
             gama = atan(Ly / Lx) - deg;
             let f2 = length * sin(gama);
             let f3 = length * cos(gama);
@@ -73,7 +75,10 @@ class Layout extends React.Component {
             P2y = Cy + f2 * cos(deg);
             P3x = Cx + f3 * cos(deg);
             P3y = Cy + f3 * sin(deg);
-          } else if (Cy < Y1 && Cx >= X1) { //第一象限
+
+            // angleCursorP1 = -PI + atan(Kpo);
+            angleCursorP1 = deg < 0 ? -PI + atan(Kpo) : PI + atan(Kpo); //bug could be here
+          } else if (Cy < Y1 && Cx >= X1) { // 相对于P1第一象限
             gama = atan(Ly / Lx) + deg;
             let f2 = length * sin(gama);
             let f3 = length * cos(gama);
@@ -81,22 +86,114 @@ class Layout extends React.Component {
             P2y = Cy + f2 * cos(deg);
             P3x = Cx - f3 * cos(deg);
             P3y = Cy - f3 * sin(deg);
+
+            angleCursorP1 = -atan(Kpo);
+
+            // angleCursorP1 = deg < 0 ? -atan(Kpo) : 2 * PI - atan(Kpo);
           }
-          if (deg >= 0 && deg <= PI / 2 && inXLimit) {
+          if (angleCursorP1 >= borderDeg1 && angleCursorP1 <= borderDeg2) {
             store.changeP2(P2x, P2y);
             store.changeP3(P3x, P3y);
           }
-          if (deg > PI / 2 && deg <= PI && inYLimit) {
-            store.changeP2(P2x, P2y);
-            store.changeP3(P3x, P3y);
+        }
+        if (movable2) {
+          let Cx = e.clientX;
+          let Cy = e.clientY;
+          let deg = rotatedAngles * PI / 180;
+
+          let Lx = abs(Cx - X3);
+          let Ly = abs(Cy - Y3);
+          let length = sqrt(Lx ** 2 + Ly ** 2);
+          let gama, P1x, P1y;
+
+          // compute the border limitation;
+          let borderDeg1 = deg;
+          let borderDeg2 = deg + PI / 2;
+          let Kpo_1 = abs((Cx - X3) / (Cy - Y3));
+          let angleCursorP3; // 计算指针的瞬时转角
+
+          if (Cy >= Y3 && Cx <= X3) { // 相对于P3第三象限
+            gama = atan(Lx / Ly) - deg;
+            let f2 = length * sin(gama);
+            P1x = Cx + f2 * cos(deg);
+            P1y = Cy + f2 * sin(deg);
+
+            angleCursorP3 = deg < 0 ? -PI + atan(Kpo_1) : PI + atan(Kpo_1);
+          } else if (Cy >= Y3 && Cx > X3) { // 相对于P3第四象限
+            gama = atan(Ly / Lx) - deg;
+            let f3 = length * cos(gama);
+            P1x = Cx - f3 * cos(deg);
+            P1y = Cy - f3 * sin(deg);
+
+            angleCursorP3 = PI - atan(Kpo_1);
+          } else if (Cy < Y3 && Cx < X3) { // 相对于P3第二象限
+            gama = atan(Lx / Ly) + deg;
+            let f2 = length * sin(gama);
+            P1x = Cx + f2 * cos(deg);
+            P1y = Cy + f2 * sin(deg);
+
+            angleCursorP3 = -atan(Kpo_1);
+          } else if (Cy < Y3 && Cx >= X3) { // 相对于P3第一象限
+            gama = atan(Lx / Ly) - deg;
+            let f2 = length * sin(gama);
+            P1x = Cx - f2 * cos(deg);
+            P1y = Cy - f2 * sin(deg);
+
+            angleCursorP3 = atan(Kpo_1);
           }
+          if (angleCursorP3 >= borderDeg1 && angleCursorP3 <= borderDeg2) {
+            store.changeP1(P1x, P1y);
+            store.changeP2(Cx, Cy);
+          }
+        }
+        if (movable3) {
+          let Cx = e.clientX;
+          let Cy = e.clientY;
+          let deg = rotatedAngles * PI / 180;
+
+          let Lx = abs(Cx - X2);
+          let Ly = abs(Cy - Y2);
+          let length = sqrt(Lx ** 2 + Ly ** 2);
+          let gama, P1x, P1y;
+
+          // compute the border limitation;
+          let borderDeg1 = deg;
+          let borderDeg2 = deg + PI / 2;
+          let Kpo_1 = abs((Cx - X3) / (Cy - Y3));
+          let angleCursorP3; // 计算指针的瞬时转角
+
+          if (Cy >= Y2 && Cx <= X2) { // 相对于P3第三象限
+            gama = atan(Lx / Ly) - deg;
+            let f3 = length * cos(gama);
+            P1x = Cx + f3 * sin(deg);
+            P1y = Cy - f3 * cos(deg);
+
+            //angleCursorP3 = atan(Kpo_1);
+          } else if (Cy >= Y2 && Cx > X2) { // 相对于P3第四象限
+
+          } else if (Cy < Y2 && Cx < X2) { // 相对于P3第二象限
+
+          } else if (Cy < Y2 && Cx >= X2) { // 相对于P3第一象限
+            gama = atan(Ly / Lx) + deg;
+            let f3 = length * cos(gama);
+            P1x = Cx + f3 * sin(deg);
+            P1y = Cy - f3 * cos(deg);
+
+
+          }
+          //if (angleCursorP3 >= borderDeg1 && angleCursorP3 <= borderDeg2) {
+          store.changeP1(P1x, P1y);
+          store.changeP3(Cx, Cy);
+          //}
         }
       },
       onMouseUp: () => {
-        if (store.movable) {
-          store.changeResizeAble(false);
-          store.updateInitState();
-        }
+        store.changeResizeAble('movable1', false);
+        store.changeResizeAble('movable2', false);
+        store.changeResizeAble('movable3', false);
+        store.changeResizeAble('movable4', false);
+
+        store.updateInitState();
       }
     };
 
@@ -104,28 +201,78 @@ class Layout extends React.Component {
       style: {
         left: x1,
         top: y1,
+        transform: `rotatez(${rotatedAngles}deg)`
+      },
+      onMouseDown: () => {
+        store.changeResizeAble('movable1', true);
       },
     };
     const props2 = {
       style: {
         left: x2,
         top: y2,
+        transform: `rotatez(${rotatedAngles}deg)`
+      },
+      onMouseDown: () => {
+        store.changeResizeAble('movable2', true);
       },
     };
     const props3 = {
       style: {
         left: x3,
         top: y3,
+        transform: `rotatez(${rotatedAngles}deg)`
+      },
+      onMouseDown: () => {
+        store.changeResizeAble('movable3', true);
       },
     };
     const props4 = {
       style: {
         left: x4,
         top: y4,
+        transform: `rotatez(${rotatedAngles}deg)`
       },
       onMouseDown: () => {
-        store.changeResizeAble(true);
+        store.changeResizeAble('movable4', true);
       },
+    };
+
+    const line12Props = {
+      style: {
+        left: x1,
+        top: y1,
+        width: L12,
+        transformOrigin: '0px 0px',
+        transform: `rotatez(${rotatedAngles}deg)`
+      }
+    };
+    const line24Props = {
+      style: {
+        left: x2,
+        top: y2,
+        height: L13,
+        transformOrigin: '0px 0px',
+        transform: `rotatez(${rotatedAngles}deg)`
+      }
+    };
+    const line43Props = {
+      style: {
+        left: x3,
+        top: y3,
+        width: L12,
+        transformOrigin: '0px 0px',
+        transform: `rotatez(${rotatedAngles}deg)`
+      }
+    };
+    const line31Props = {
+      style: {
+        left: x1,
+        top: y1,
+        height: L13,
+        transformOrigin: '0px 0px',
+        transform: `rotatez(${rotatedAngles}deg)`
+      }
     };
 
     const inputProps = {
@@ -137,6 +284,18 @@ class Layout extends React.Component {
       }
     };
 
+    const imgProps = {
+      src: '//f12.baidu.com/it/u=3438140340,1307248730&fm=72',
+      style: {
+        width: L12,
+        height: L13,
+        left: x1,
+        top: y1,
+        transformOrigin: '0px 0px',
+        transform: `rotatez(${rotatedAngles}deg)`
+      }
+    };
+
     return (
       <div className={css.layout} {...viewProps}>
         <div className={css.divWrapper}>
@@ -145,10 +304,14 @@ class Layout extends React.Component {
           <div {...props3}>3</div>
           <div {...props4}>4</div>
           <input {...inputProps}/>
+          <img {...imgProps} />
+          <Portal>
+            <div className="line12" {...line12Props} />
+            <div className="line24" {...line24Props}/>
+            <div className="line43" {...line43Props}/>
+            <div className="line31" {...line31Props}/>
+          </Portal>
         </div>
-        <svg className={css.svgWrapper}>
-          <polygon points={path}/>
-        </svg>
       </div>
     );
   }
