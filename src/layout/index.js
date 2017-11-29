@@ -29,8 +29,11 @@ class Layout extends React.Component {
 
     const viewProps = {
       onMouseMove: (e) => {
-        const {x1: X1, y1: Y1, x2: X2, y2: Y2, x3: X3, y3: Y3, x4: X4, y4: Y4} = store;
+        const {x1: X1, y1: Y1, x2: X2, y2: Y2, x3: X3, y3: Y3} = store;
         const {movable1, movable2, movable3, movable4} = store;
+        const {x4: X4, y4: Y4} = store.properties;
+        /*const X4 = 136.2071934021007;
+        const Y4 = 204.76676744201643;*/
         if (movable4) {
           let Cx = e.clientX;
           let Cy = e.clientY;
@@ -159,8 +162,8 @@ class Layout extends React.Component {
           // compute the border limitation;
           let borderDeg1 = deg;
           let borderDeg2 = deg + PI / 2;
-          let Kpo_1 = abs((Cx - X3) / (Cy - Y3));
-          let angleCursorP3; // 计算指针的瞬时转角
+          let Kpp2_1 = abs((Cx - X2) / (Cy - Y2));
+          let angleCursorP3; // 指针瞬时转角
 
           if (Cy >= Y2 && Cx <= X2) { // 相对于P3第三象限
             gama = atan(Lx / Ly) - deg;
@@ -168,23 +171,96 @@ class Layout extends React.Component {
             P1x = Cx + f3 * sin(deg);
             P1y = Cy - f3 * cos(deg);
 
-            //angleCursorP3 = atan(Kpo_1);
+            angleCursorP3 = atan(Kpp2_1);
           } else if (Cy >= Y2 && Cx > X2) { // 相对于P3第四象限
-
-          } else if (Cy < Y2 && Cx < X2) { // 相对于P3第二象限
-
-          } else if (Cy < Y2 && Cx >= X2) { // 相对于P3第一象限
-            gama = atan(Ly / Lx) + deg;
+            gama = atan(Lx / Ly) + deg;
             let f3 = length * cos(gama);
             P1x = Cx + f3 * sin(deg);
             P1y = Cy - f3 * cos(deg);
 
+            angleCursorP3 = -atan(Kpp2_1);
+          } else if (Cy < Y2 && Cx < X2) { // 相对于P3第二象限
+            gama = atan(Ly / Lx) - deg;
+            let f2 = length * sin(gama);
+            P1x = Cx - f2 * sin(deg);
+            P1y = Cy + f2 * cos(deg);
 
+            angleCursorP3 = PI - atan(Kpp2_1);
+          } else if (Cy < Y2 && Cx >= X2) { // 相对于P3第一象限
+            gama = atan(Ly / Lx) + deg;
+            let f2 = length * sin(gama);
+            P1x = Cx - f2 * sin(deg);
+            P1y = Cy + f2 * cos(deg);
+
+            angleCursorP3 = deg > 0 ? PI + atan(Kpp2_1) : -PI + atan(Kpp2_1);
           }
-          //if (angleCursorP3 >= borderDeg1 && angleCursorP3 <= borderDeg2) {
-          store.changeP1(P1x, P1y);
-          store.changeP3(Cx, Cy);
-          //}
+          if (angleCursorP3 >= borderDeg1 && angleCursorP3 <= borderDeg2) {
+            store.changeP1(P1x, P1y);
+            store.changeP3(Cx, Cy);
+          }
+        }
+        if (movable1) {
+          let Cx = e.clientX;
+          let Cy = e.clientY;
+          let deg = rotatedAngles * PI / 180;
+
+          let Lx = abs(Cx - X4);
+          let Ly = abs(Cy - Y4);
+          let length = sqrt(Lx ** 2 + Ly ** 2);
+          let gama, P2x, P2y, P3x, P3y;
+
+          // compute the border limitation;
+          let borderDeg1 = deg;
+          let borderDeg2 = deg + PI / 2;
+          let Kpp4 = abs((Cy - Y4) / (Cx - X4));
+          let angleCursorP4; // 指针瞬时转角，x轴负向顺时针起为正
+
+          if (Cy >= Y4 && Cx <= X4) { // 相对于P4第三象限
+            gama = atan(Lx / Ly) - deg;
+            let f2 = length * sin(gama);
+            let f3 = length * cos(gama);
+            P2x = Cx + f2 * cos(deg);
+            P2y = Cy + f2 * sin(deg);
+            P3x = Cx + f3 * sin(deg);
+            P3y = Cy - f3 * cos(deg);
+
+            angleCursorP4 = -atan(Kpp4);
+          } else if (Cy >= Y4 && Cx > X4) { // 相对于P4第四象限
+            gama = atan(Ly / Lx) - deg;
+            let f2 = length * cos(gama);
+            let f3 = length * sin(gama);
+            P2x = Cx - f2 * cos(deg);
+            P2y = Cy - f2 * sin(deg);
+            P3x = Cx + f3 * sin(deg);
+            P3y = Cy - f3 * cos(deg);
+
+            angleCursorP4 = deg < 0 ? -PI + atan(Kpp4) : PI + atan(Kpp4);
+          } else if (Cy < Y4 && Cx < X4) { // 相对于P4第二象限
+            gama = atan(Lx / Ly) + deg;
+            let f2 = length * sin(gama);
+            let f3 = length * cos(gama);
+            P2x = Cx + f2 * cos(deg);
+            P2y = Cy + f2 * sin(deg);
+            P3x = Cx - f3 * sin(deg);
+            P3y = Cy + f3 * cos(deg);
+
+            angleCursorP4 = atan(Kpp4);
+          } else if (Cy < Y4 && Cx >= X4) { // 相对于P4第一象限
+            gama = atan(Ly / Lx) + deg;
+            let f2 = length * cos(gama);
+            let f3 = length * sin(gama);
+            P2x = Cx - f2 * cos(deg);
+            P2y = Cy - f2 * sin(deg);
+            P3x = Cx - f3 * sin(deg);
+            P3y = Cy + f3 * cos(deg);
+
+            angleCursorP4 = PI - atan(Kpp4);
+          }
+          if (angleCursorP4 >= borderDeg1 && angleCursorP4 <= borderDeg2) {
+            store.changeP1(Cx, Cy);
+            store.changeP2(P2x, P2y);
+            store.changeP3(P3x, P3y);
+          }
         }
       },
       onMouseUp: () => {
