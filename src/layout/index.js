@@ -16,6 +16,10 @@ class Layout extends React.Component {
     this.state = {};
   }
 
+  componentDidMount() {
+    document.querySelector('#root');
+  }
+
   onChange(e) {
     this.props.store.swingAngle(e.target.value);
   }
@@ -32,23 +36,24 @@ class Layout extends React.Component {
         const {x1: X1, y1: Y1, x2: X2, y2: Y2, x3: X3, y3: Y3} = store;
         const {movable1, movable2, movable3, movable4} = store;
         const {x4: X4, y4: Y4} = store.properties;
-        /*const X4 = 136.2071934021007;
-        const Y4 = 204.76676744201643;*/
-        if (movable4) {
-          let Cx = e.clientX;
-          let Cy = e.clientY;
-          let deg = rotatedAngles * PI / 180;
 
+        let Cx = e.clientX;
+        let Cy = e.clientY;
+        let deg = rotatedAngles * PI / 180;
+
+        // compute the border limitation;
+        let borderDeg1 = deg;
+        let borderDeg2 = deg + PI / 2;
+
+        if (movable4) {
           let Lx = abs(Cx - X1);
           let Ly = abs(Cy - Y1);
           let length = sqrt(Lx ** 2 + Ly ** 2);
           let gama, P2x, P2y, P3x, P3y;
 
           // compute the border limitation;
-          let borderDeg1 = deg;
-          let borderDeg2 = deg + PI / 2;
           let Kpo = abs((Cy - Y1) / (Cx - X1));
-          let angleCursorP1; // 计算指针的瞬时转角
+          let angleCursorP1; // 计算指针的瞬时转角, X轴正向顺时针为正
 
           if (Cy >= Y1 && Cx <= X1) { // 相对于P1第三象限
             gama = PI - deg - atan(Ly / Lx);
@@ -79,7 +84,6 @@ class Layout extends React.Component {
             P3x = Cx + f3 * cos(deg);
             P3y = Cy + f3 * sin(deg);
 
-            // angleCursorP1 = -PI + atan(Kpo);
             angleCursorP1 = deg < 0 ? -PI + atan(Kpo) : PI + atan(Kpo); //bug could be here
           } else if (Cy < Y1 && Cx >= X1) { // 相对于P1第一象限
             gama = atan(Ly / Lx) + deg;
@@ -91,8 +95,6 @@ class Layout extends React.Component {
             P3y = Cy - f3 * sin(deg);
 
             angleCursorP1 = -atan(Kpo);
-
-            // angleCursorP1 = deg < 0 ? -atan(Kpo) : 2 * PI - atan(Kpo);
           }
           if (angleCursorP1 >= borderDeg1 && angleCursorP1 <= borderDeg2) {
             store.changeP2(P2x, P2y);
@@ -100,18 +102,12 @@ class Layout extends React.Component {
           }
         }
         if (movable2) {
-          let Cx = e.clientX;
-          let Cy = e.clientY;
-          let deg = rotatedAngles * PI / 180;
-
           let Lx = abs(Cx - X3);
           let Ly = abs(Cy - Y3);
           let length = sqrt(Lx ** 2 + Ly ** 2);
           let gama, P1x, P1y;
 
           // compute the border limitation;
-          let borderDeg1 = deg;
-          let borderDeg2 = deg + PI / 2;
           let Kpo_1 = abs((Cx - X3) / (Cy - Y3));
           let angleCursorP3; // 计算指针的瞬时转角
 
@@ -150,18 +146,12 @@ class Layout extends React.Component {
           }
         }
         if (movable3) {
-          let Cx = e.clientX;
-          let Cy = e.clientY;
-          let deg = rotatedAngles * PI / 180;
-
           let Lx = abs(Cx - X2);
           let Ly = abs(Cy - Y2);
           let length = sqrt(Lx ** 2 + Ly ** 2);
           let gama, P1x, P1y;
 
           // compute the border limitation;
-          let borderDeg1 = deg;
-          let borderDeg2 = deg + PI / 2;
           let Kpp2_1 = abs((Cx - X2) / (Cy - Y2));
           let angleCursorP3; // 指针瞬时转角
 
@@ -200,18 +190,12 @@ class Layout extends React.Component {
           }
         }
         if (movable1) {
-          let Cx = e.clientX;
-          let Cy = e.clientY;
-          let deg = rotatedAngles * PI / 180;
-
           let Lx = abs(Cx - X4);
           let Ly = abs(Cy - Y4);
           let length = sqrt(Lx ** 2 + Ly ** 2);
           let gama, P2x, P2y, P3x, P3y;
 
           // compute the border limitation;
-          let borderDeg1 = deg;
-          let borderDeg2 = deg + PI / 2;
           let Kpp4 = abs((Cy - Y4) / (Cx - X4));
           let angleCursorP4; // 指针瞬时转角，x轴负向顺时针起为正
 
@@ -355,9 +339,6 @@ class Layout extends React.Component {
       type: 'number',
       value: rotatedAngles,
       onChange: this.onChange.bind(this),
-      onMouseUp: (e) => {
-        e.stopPropagation();
-      }
     };
 
     const imgProps = {
@@ -375,10 +356,10 @@ class Layout extends React.Component {
     return (
       <div className={css.layout} {...viewProps}>
         <div className={css.divWrapper}>
-          <div {...props1}>1</div>
-          <div {...props2}>2</div>
-          <div {...props3}>3</div>
-          <div {...props4}>4</div>
+          <div {...props1} className="point1" />
+          <div {...props2} className="point2" />
+          <div {...props3} className="point3" />
+          <div {...props4} className="point4" />
           <input {...inputProps}/>
           <img {...imgProps} />
           <Portal>

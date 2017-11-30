@@ -19,7 +19,7 @@ export default class Store {
   @observable initOx = 0;
   @observable initOy = 0;
 
-  @observable rotatedAngles = 0; //angle, not radian
+  @observable rotatedAngles = 0; //angle, not radian，X轴负向顺时针为正
 
   @observable movable1 = false;
   @observable movable2 = false;
