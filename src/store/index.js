@@ -6,11 +6,11 @@ import {observable, computed, action} from 'mobx';
 const {sin, cos, atan, asin, acos, PI, sqrt} = Math;
 
 export default class Store {
-  @observable x1 = 0;
+  @observable x1 = 0; // letTop
   @observable y1 = 0;
-  @observable x2 = 0;
+  @observable x2 = 0;// rightTop
   @observable y2 = 0;
-  @observable x3 = 0;
+  @observable x3 = 0;// leftBottom
   @observable y3 = 0;
   @observable initAngleP1 = 0;
   @observable initAngleP2 = 0;
@@ -21,10 +21,15 @@ export default class Store {
 
   @observable rotatedAngles = 0; //angle, not radian，X轴负向顺时针为正
 
-  @observable movable1 = false;
-  @observable movable2 = false;
-  @observable movable3 = false;
-  @observable movable4 = false;
+  @observable resizeable1 = false;
+  @observable resizeable2 = false;
+  @observable resizeable3 = false;
+  @observable resizeable4 = false;
+
+  @observable resizeable12 = false;
+  @observable resizeable24 = false;
+  @observable resizeable43 = false;
+  @observable resizeable31 = false;
 
   constructor() {
     this.x1 = 100;
@@ -58,8 +63,16 @@ export default class Store {
 
   @computed get properties() {
     return {
-      x4: this.x2 + this.x3 - this.x1,
+      x4: this.x2 + this.x3 - this.x1, //rightBottom
       y4: this.y2 + this.y3 - this.y1,
+      x12: (this.x1 + this.x2) / 2,
+      y12: (this.y1 + this.y2) / 2,
+      x24: (2 * this.x2 + this.x3 - this.x1) / 2,
+      y24: (2 * this.y2 + this.y3 - this.y1) / 2,
+      x43: (2 * this.x3 + this.x2 - this.x1) / 2,
+      y43: (2 * this.y3 + this.y2 - this.y1) / 2,
+      x31: (this.x1 + this.x3) / 2,
+      y31: (this.y1 + this.y3) / 2,
       Ox: (this.x2 + this.x3) / 2,
       Oy: (this.y2 + this.y3) / 2,
       L12: sqrt((this.x2 - this.x1) ** 2 + (this.y2 - this.y1) ** 2),
@@ -86,14 +99,6 @@ export default class Store {
     this.y3 = y;
   }
 
-  get recWidth() {
-    return Math.sqrt((this.x2 - this.x1) ** 2 + (this.y2 - this.y1) ** 2);
-  }
-
-  get recHeight() {
-    return Math.sqrt((this.x3 - this.x1) ** 2 + (this.y3 - this.y1) ** 2);
-  }
-
   @action changeResizeAble(which, able) {
     this[which] = able;
   }
@@ -104,7 +109,7 @@ export default class Store {
     this.initRadius = this.radius;
     this.initOx = (this.x2 + this.x3) / 2;
     this.initOy = (this.y2 + this.y3) / 2;
-    //CurrentAngleP1 is always <= PI / 2
+    // CurrentAngleP1 computed always <= PI / 2 even if it is >= PI / 2 in real situation
     if (this.initOx <= this.x1) {
       this.initAngleP1 = PI - CurrentAngleP1 - rotatedAngles;
     } else {
