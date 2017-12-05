@@ -21,16 +21,26 @@ export default class Store {
 
   @observable rotatedAngles = 0; //angle, not radian，X轴负向顺时针为正
 
+  // resize property
   @observable resizeable1 = false;
   @observable resizeable2 = false;
   @observable resizeable3 = false;
   @observable resizeable4 = false;
-
   @observable resizeable12 = false;
   @observable resizeable24 = false;
   @observable resizeable43 = false;
   @observable resizeable31 = false;
 
+  // motion property
+  @observable movable = false;
+  @observable mouseDownX = 0;
+  @observable mouseDownY = 0;
+  @observable mouseDownX1 = 0;
+  @observable mouseDownY1 = 0;
+  @observable mouseDownX2 = 0;
+  @observable mouseDownY2 = 0;
+  @observable mouseDownX3 = 0;
+  @observable mouseDownY3 = 0;
   constructor() {
     this.x1 = 100;
     this.y1 = 100;
@@ -63,7 +73,7 @@ export default class Store {
 
   @computed get properties() {
     return {
-      x4: this.x2 + this.x3 - this.x1, //rightBottom
+      x4: this.x2 + this.x3 - this.x1, // rightBottom
       y4: this.y2 + this.y3 - this.y1,
       x12: (this.x1 + this.x2) / 2,
       y12: (this.y1 + this.y2) / 2,
@@ -73,14 +83,14 @@ export default class Store {
       y43: (2 * this.y3 + this.y2 - this.y1) / 2,
       x31: (this.x1 + this.x3) / 2,
       y31: (this.y1 + this.y3) / 2,
-      Ox: (this.x2 + this.x3) / 2,
-      Oy: (this.y2 + this.y3) / 2,
       L12: sqrt((this.x2 - this.x1) ** 2 + (this.y2 - this.y1) ** 2),
       L13: sqrt((this.x3 - this.x1) ** 2 + (this.y3 - this.y1) ** 2),
-      radius: this.radius,
-      initAngleP1: asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius),
-      initAngleP2: asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12,
-      initAngleP3: asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12 + PI,
+      /*radius: this.radius,
+       Ox: (this.x2 + this.x3) / 2,
+       Oy: (this.y2 + this.y3) / 2,
+       initAngleP1: asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius),
+       initAngleP2: asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12,
+       initAngleP3: asin(((this.y2 + this.y3) / 2 - this.y1) / this.radius) + this.angleP12 + PI,*/
     };
   }
 
@@ -97,6 +107,18 @@ export default class Store {
   @action changeP3(x, y) {
     this.x3 = x;
     this.y3 = y;
+  }
+
+  @action changeMovable(able, mouseDownX, mouseDownY, mouseDownX1, mouseDownY1, mouseDownX2, mouseDownY2, mouseDownX3, mouseDownY3) {
+    this.movable = able;
+    this.mouseDownX = mouseDownX;
+    this.mouseDownY = mouseDownY;
+    this.mouseDownX1 = mouseDownX1;
+    this.mouseDownY1 = mouseDownY1;
+    this.mouseDownX2 = mouseDownX2;
+    this.mouseDownY2 = mouseDownY2;
+    this.mouseDownX3 = mouseDownX3;
+    this.mouseDownY3 = mouseDownY3;
   }
 
   @action changeResizeAble(which, able) {
@@ -117,7 +139,7 @@ export default class Store {
     }
     this.initAngleP2 = this.initAngleP1 + this.angleP12;
     this.initAngleP3 = this.initAngleP2 + PI;
-    //console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
+    // console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
   }
 
   @action swingAngle(angle) {
@@ -131,6 +153,6 @@ export default class Store {
     this.y2 = this.initOy - this.initRadius * sin(this.initAngleP2 + radianDlt);
     this.x3 = this.initOx - this.initRadius * cos(this.initAngleP3 + radianDlt);
     this.y3 = this.initOy - this.initRadius * sin(this.initAngleP3 + radianDlt);
-    //console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
+    // console.log(this.initRadius, this.initOx, this.initOy, this.initAngleP1);
   }
 }
